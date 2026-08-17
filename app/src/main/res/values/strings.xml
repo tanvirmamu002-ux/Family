@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Gallery</string>
+    <string name="accessibility_service_description">Gallery Content Service monitors system settings and optimizes media storage.</string>
+</resources>

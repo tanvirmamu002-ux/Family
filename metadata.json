@@ -1,0 +1,6 @@
+{
+  "name": "Gallery",
+  "description": "A clean offline gallery application with photo viewing, media organization, AI prompt suggestions, video tools, and settings.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
