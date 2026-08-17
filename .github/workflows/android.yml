@@ -1,9 +1,11 @@
+# Android CI Build
+# এই workflow টা app/ মডিউল থেকে Gradle চালাবে — যেখানে আপনার Android প্রকল্প হতে পারে
 name: Android CI Build
 
 on:
   push:
     branches: [ "main" ]
-  pull_request:  # PR-এও বিল্ড চালান
+  pull_request:
     branches: [ "main" ]
   workflow_dispatch:
 
@@ -19,26 +21,40 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-        cache: gradle  # Gradle ক্যাশ করুন (দ্রুত বিল্ড)
+        cache: gradle
 
-    - name: Setup Gradle
+    - name: Setup Gradle CLI
       uses: gradle/actions/setup-gradle@v3
 
-    - name: Generate Gradle Wrapper if missing
+    - name: Ensure app/ exists
       run: |
-        if [ ! -f ./gradlew ]; then
-          gradle wrapper
+        if [ ! -d ./app ]; then
+          echo "ERROR: app/ directory not found. Please ensure Android project is under app/ or update workflow path."
+          exit 1
         fi
 
-    - name: Grant execute permission for gradlew
+    - name: Generate Gradle Wrapper if missing (in app/)
+      working-directory: ./app
+      run: |
+        # If wrapper script not present, attempt to create wrapper using installed Gradle CLI
+        if [ ! -f ./gradlew ]; then
+          echo "gradlew not found in app/ — running 'gradle wrapper' to generate it"
+          gradle wrapper
+        else
+          echo "gradlew already present in app/"
+        fi
+
+    - name: Grant execute permission for gradlew (in app/)
+      working-directory: ./app
       run: chmod +x gradlew
 
-    - name: Build with Gradle
-      run: ./gradlew assembleDebug
+    - name: Build with Gradle (in app/)
+      working-directory: ./app
+      run: ./gradlew assembleDebug --no-daemon
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
-      if: success()  # শুধুমাত্র সফল বিল্ডের ক্ষেত্রে APK আপলোড করুন
+      if: success()
       with:
         name: app-debug
         path: app/build/outputs/apk/debug/app-debug.apk
